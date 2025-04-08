@@ -2417,7 +2417,19 @@ async def retry_telegram_action(action_func, max_retries=3):
                 raise
             logger.warning(f"Telegram action failed, retrying ({attempt+1}/{max_retries}): {e}")
             await asyncio.sleep(1)
-
+            
+# Error handler
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log errors caused by Updates."""
+    logger.error("Exception while handling an update:", exc_info=context.error)
+    
+    # Send message to user
+    if update and isinstance(update, Update) and update.effective_chat:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Sorry, something went wrong. Please try again later.",
+            reply_markup=back_to_menu_keyboard()
+        )
 
 def main() -> None:
     """Start the bot."""
